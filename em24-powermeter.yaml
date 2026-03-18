@@ -7,16 +7,16 @@ esp32:
   framework:
     type: arduino
 
-# Logging auf WARN-Level — reduziert Traffic, behält Fehlermeldungen
+# Logging at WARN level — reduces traffic, keeps error messages
 logger:
   level: WARN
 
-# Home Assistant API mit verschlüsselter Verbindung
+# Home Assistant API with encrypted connection
 api:
   encryption:
     key: !secret api_encryption_key
 
-# OTA-Updates über ESPHome
+# OTA updates via ESPHome
 ota:
   - platform: esphome
     password: !secret ota_password
@@ -25,12 +25,12 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
-# Einfaches Web-Interface für direkten Zugriff im lokalen Netz
+# Simple web interface for direct access on the local network
 web_server:
   port: 80
 
-# UART-Bus für Modbus RTU (RS485)
-# ESP32-C3: TX=GPIO4, RX=GPIO3 — 9600 Baud, 8N1
+# UART bus for Modbus RTU (RS485)
+# ESP32-C3: TX=GPIO4, RX=GPIO3 — 9600 baud, 8N1
 uart:
   id: mod_bus
   tx_pin: 4
@@ -38,15 +38,15 @@ uart:
   baud_rate: 9600
   stop_bits: 1
 
-# Modbus RTU Master
+# Modbus RTU master
 modbus:
   id: modbus1
 
-# Carlo Gavazzi EM24 Energiezähler
-# Modbus-Adresse: 0x01 (Werkseinstellung)
-# Update-Intervall: 10 Sekunden
-# Hinweis: Registeradressen gelten für EM24-DIN AV5 3(O)5 X O1 PF A
-# Bei anderen Modellvarianten bitte mit dem Datenblatt abgleichen
+# Carlo Gavazzi EM24 energy meter
+# Modbus address: 0x01 (factory default)
+# Update interval: 10 seconds
+# Note: Register addresses apply to EM24-DIN AV5 3(O)5 X O1 PF A
+# For other model variants please verify against the datasheet
 modbus_controller:
   - id: EM24
     address: 0x1
@@ -57,8 +57,8 @@ modbus_controller:
 sensor:
 
   # ═══════════════════════════════════════════════════════════════
-  # SPANNUNGEN — Phasen gegen Neutralleiter (L-N)
-  # Auflösung: 0.1 V | Typ: S_DWORD_R (32-Bit, signed)
+  # VOLTAGES — Phase to neutral (L-N)
+  # Resolution: 0.1 V | Type: S_DWORD_R (32-bit, signed)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -107,8 +107,8 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # SPANNUNGEN — Leiter-Leiter (L-L)
-  # Auflösung: 0.1 V | Typ: S_DWORD_R (32-Bit, signed)
+  # VOLTAGES — Line to line (L-L)
+  # Resolution: 0.1 V | Type: S_DWORD_R (32-bit, signed)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -157,8 +157,8 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # STRÖME — Phasenströme
-  # Auflösung: 1 mA → multiply: 0.001 → A | Typ: S_DWORD_R (32-Bit, signed)
+  # CURRENTS — Phase currents
+  # Resolution: 1 mA → multiply: 0.001 → A | Type: S_DWORD_R (32-bit, signed)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -207,8 +207,8 @@ sensor:
       - multiply: 0.001
 
   # ═══════════════════════════════════════════════════════════════
-  # WIRKLEISTUNG — pro Phase (Active Power)
-  # Auflösung: 0.1 W | Typ: S_DWORD_R (negativ = Einspeisung)
+  # ACTIVE POWER — per phase
+  # Resolution: 0.1 W | Type: S_DWORD_R (negative = feed-in)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -257,8 +257,8 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # SCHEINLEISTUNG — pro Phase (Apparent Power)
-  # Auflösung: 0.1 VA | Typ: U_DWORD_R (immer positiv)
+  # APPARENT POWER — per phase
+  # Resolution: 0.1 VA | Type: U_DWORD_R (always positive)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -307,8 +307,8 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # BLINDLEISTUNG — pro Phase (Reactive Power)
-  # Auflösung: 0.1 VAr | Typ: S_DWORD_R (negativ = kapazitiv)
+  # REACTIVE POWER — per phase
+  # Resolution: 0.1 VAr | Type: S_DWORD_R (negative = capacitive)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -357,9 +357,9 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # LEISTUNGSFAKTOR — pro Phase (Power Factor)
-  # Auflösung: 0.001 | Typ: S_WORD (16-Bit, signed)
-  # Wertebereich: -1.000 bis +1.000 (negativ = Einspeisung/kapazitiv)
+  # POWER FACTOR — per phase
+  # Resolution: 0.001 | Type: S_WORD (16-bit, signed)
+  # Range: -1.000 to +1.000 (negative = feed-in/capacitive)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -408,8 +408,8 @@ sensor:
       - multiply: 0.001
 
   # ═══════════════════════════════════════════════════════════════
-  # GESAMT-WIRKLEISTUNG (Total Active Power)
-  # Auflösung: 0.1 W | Typ: U_DWORD_R
+  # TOTAL ACTIVE POWER
+  # Resolution: 0.1 W | Type: U_DWORD_R
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -428,8 +428,8 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # GESAMT-SCHEINLEISTUNG (Total Apparent Power)
-  # Auflösung: 0.1 VA | Typ: U_DWORD_R
+  # TOTAL APPARENT POWER
+  # Resolution: 0.1 VA | Type: U_DWORD_R
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -448,8 +448,8 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # GESAMT-BLINDLEISTUNG (Total Reactive Power)
-  # Auflösung: 0.1 VAr | Typ: S_DWORD_R (negativ = kapazitiv)
+  # TOTAL REACTIVE POWER
+  # Resolution: 0.1 VAr | Type: S_DWORD_R (negative = capacitive)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -468,8 +468,8 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # GESAMT-LEISTUNGSFAKTOR (Total Power Factor)
-  # Auflösung: 0.001 | Typ: S_WORD (16-Bit, signed)
+  # TOTAL POWER FACTOR
+  # Resolution: 0.001 | Type: S_WORD (16-bit, signed)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -488,8 +488,8 @@ sensor:
       - multiply: 0.001
 
   # ═══════════════════════════════════════════════════════════════
-  # NETZFREQUENZ (Frequency)
-  # Auflösung: 0.1 Hz | Typ: S_WORD (16-Bit, signed)
+  # GRID FREQUENCY
+  # Resolution: 0.1 Hz | Type: S_WORD (16-bit, signed)
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller
@@ -508,11 +508,11 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # ENERGIE — Wirkenergie Import/Export (Active Energy)
-  # Auflösung: 0.1 kWh | Typ: U_DWORD_R (32-Bit, unsigned)
+  # ENERGY — Active energy import/export
+  # Resolution: 0.1 kWh | Type: U_DWORD_R (32-bit, unsigned)
   # ═══════════════════════════════════════════════════════════════
 
-  # Wirkenergie Import (Bezug aus dem Netz)
+  # Active energy import (grid consumption)
   - platform: modbus_controller
     modbus_controller_id: EM24
     name: "energy_import"
@@ -528,7 +528,7 @@ sensor:
     filters:
       - multiply: 0.1
 
-  # Wirkenergie Export (Einspeisung ins Netz) oder Teilzähler je nach Modell
+  # Active energy export (grid feed-in) or sub-meter depending on model
   - platform: modbus_controller
     modbus_controller_id: EM24
     name: "energy_export"
@@ -545,10 +545,10 @@ sensor:
       - multiply: 0.1
 
   # ═══════════════════════════════════════════════════════════════
-  # ENERGIE — Blindenergie (Reactive Energy)
-  # Auflösung: 0.1 kVArh | Typ: U_DWORD_R (32-Bit, unsigned)
-  # Q1 = induktiv/import | Q2 = kapazitiv/import
-  # Q3 = induktiv/export | Q4 = kapazitiv/export
+  # ENERGY — Reactive energy
+  # Resolution: 0.1 kVArh | Type: U_DWORD_R (32-bit, unsigned)
+  # Q1 = inductive/import | Q2 = capacitive/import
+  # Q3 = inductive/export | Q4 = capacitive/export
   # ═══════════════════════════════════════════════════════════════
 
   - platform: modbus_controller

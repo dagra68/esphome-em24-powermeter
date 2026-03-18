@@ -1,7 +1,7 @@
 # ESPHome Modbus EM24 Powermeter
 
-ESPHome-Konfiguration für den Carlo Gavazzi EM24 Energiezähler über Modbus RTU (RS485).
-Liest alle verfügbaren Messwerte aus und stellt sie in Home Assistant bereit.
+ESPHome configuration for the Carlo Gavazzi EM24 energy meter via Modbus RTU (RS485).
+Reads all available measurements and exposes them to Home Assistant.
 
 ![ESPHome](https://img.shields.io/badge/ESPHome-2024.x-blue)
 ![ESP32-C3](https://img.shields.io/badge/ESP32-C3-green)
@@ -11,33 +11,33 @@ Liest alle verfügbaren Messwerte aus und stellt sie in Home Assistant bereit.
 
 ## Hardware
 
-| Komponente | Details |
-|------------|---------|
-| Mikrocontroller | ESP32-C3 DevKitM-1 |
+| Component | Details |
+|-----------|---------|
+| Microcontroller | ESP32-C3 DevKitM-1 |
 | Framework | Arduino |
-| Energiezähler | Carlo Gavazzi EM24 (3-phasig) |
-| Protokoll | Modbus RTU über RS485 |
-| Baudrate | 9600, 8N1 |
+| Energy meter | Carlo Gavazzi EM24 (3-phase) |
+| Protocol | Modbus RTU over RS485 |
+| Baud rate | 9600, 8N1 |
 
-**Verkabelung (ESP32-C3 ↔ RS485-Modul):**
+**Wiring (ESP32-C3 ↔ RS485 module):**
 
-| ESP32-C3 | RS485-Modul | EM24 |
-|----------|-------------|------|
+| ESP32-C3 | RS485 module | EM24 |
+|----------|--------------|------|
 | GPIO4 (TX) | DI | — |
 | GPIO3 (RX) | RO | — |
 | GND | GND | — |
 | — | A+ | A |
 | — | B- | B |
 
-> Die Modbus-Adresse des EM24 ist werkseitig auf `0x01` gesetzt.
+> The Modbus address of the EM24 is factory-set to `0x01`.
 
 ---
 
-## Messwerte
+## Measurements
 
-### Spannungen
-| Sensor | Einheit | Register |
-|--------|---------|---------|
+### Voltages
+| Sensor | Unit | Register |
+|--------|------|----------|
 | `voltage_l1_n` | V | 0x0000 |
 | `voltage_l2_n` | V | 0x0002 |
 | `voltage_l3_n` | V | 0x0004 |
@@ -45,48 +45,48 @@ Liest alle verfügbaren Messwerte aus und stellt sie in Home Assistant bereit.
 | `voltage_l2_l3` | V | 0x0008 |
 | `voltage_l3_l1` | V | 0x000A |
 
-### Ströme
-| Sensor | Einheit | Register |
-|--------|---------|---------|
+### Currents
+| Sensor | Unit | Register |
+|--------|------|----------|
 | `current_l1` | A | 0x000C |
 | `current_l2` | A | 0x000E |
 | `current_l3` | A | 0x0010 |
 
-### Wirkleistung (Active Power)
-| Sensor | Einheit | Register |
-|--------|---------|---------|
+### Active Power
+| Sensor | Unit | Register |
+|--------|------|----------|
 | `power_l1` | W | 0x0012 |
 | `power_l2` | W | 0x0014 |
 | `power_l3` | W | 0x0016 |
 | `power_total` | W | 0x0028 |
 
-### Scheinleistung (Apparent Power)
-| Sensor | Einheit | Register |
-|--------|---------|---------|
+### Apparent Power
+| Sensor | Unit | Register |
+|--------|------|----------|
 | `apparent_power_l1` | VA | 0x0018 |
 | `apparent_power_l2` | VA | 0x001A |
 | `apparent_power_l3` | VA | 0x001C |
 | `apparent_power_total` | VA | 0x002A |
 
-### Blindleistung (Reactive Power)
-| Sensor | Einheit | Register |
-|--------|---------|---------|
+### Reactive Power
+| Sensor | Unit | Register |
+|--------|------|----------|
 | `reactive_power_l1` | VAr | 0x001E |
 | `reactive_power_l2` | VAr | 0x0020 |
 | `reactive_power_l3` | VAr | 0x0022 |
 | `reactive_power_total` | VAr | 0x002C |
 
-### Leistungsfaktor (Power Factor)
-| Sensor | Einheit | Register |
-|--------|---------|---------|
+### Power Factor
+| Sensor | Unit | Register |
+|--------|------|----------|
 | `power_factor_l1` | — | 0x0024 |
 | `power_factor_l2` | — | 0x0025 |
 | `power_factor_l3` | — | 0x0026 |
 | `power_factor_total` | — | 0x002E |
 
-### Frequenz & Energie
-| Sensor | Einheit | Register |
-|--------|---------|---------|
+### Frequency & Energy
+| Sensor | Unit | Register |
+|--------|------|----------|
 | `frequency` | Hz | 0x0037 |
 | `energy_import` | kWh | 0x003C |
 | `energy_export` | kWh | 0x003E |
@@ -99,26 +99,26 @@ Liest alle verfügbaren Messwerte aus und stellt sie in Home Assistant bereit.
 
 ## Installation
 
-**1. Repository klonen:**
+**1. Clone the repository:**
 ```bash
 git clone https://github.com/dagra68/esphome-em24-powermeter.git
 cd esphome-em24-powermeter
 ```
 
-**2. `secrets.yaml` anlegen** (nicht im Repository enthalten):
+**2. Create `secrets.yaml`** (not included in the repository):
 ```yaml
-wifi_ssid: "DeinNetzwerk"
-wifi_password: "DeinPasswort"
-api_encryption_key: "DeinAPIKey"
-ota_password: "DeinOTAPasswort"
+wifi_ssid: "YourNetwork"
+wifi_password: "YourPassword"
+api_encryption_key: "YourAPIKey"
+ota_password: "YourOTAPassword"
 ```
 
-API-Key und OTA-Passwort generieren:
+Generate API key and OTA password:
 ```bash
 esphome generate-secret
 ```
 
-**3. Kompilieren und flashen:**
+**3. Compile and flash:**
 ```bash
 esphome run em24-powermeter.yaml
 ```
@@ -127,17 +127,17 @@ esphome run em24-powermeter.yaml
 
 ## Home Assistant
 
-Nach dem Flash erscheinen alle Sensoren automatisch als Entitäten in Home Assistant (native API, Port 6053).
+After flashing, all sensors appear automatically as entities in Home Assistant (native API, port 6053).
 
-Empfohlene Verwendung im Energie-Dashboard:
-- `energy_import` → Netzbezug
-- `energy_export` → Einspeisung
-- `power_total` → Aktuelle Gesamtleistung
+Recommended use in the Energy dashboard:
+- `energy_import` → Grid consumption
+- `energy_export` → Grid feed-in
+- `power_total` → Current total power
 
 ---
 
-## Hinweise
+## Notes
 
-- Registeradressen gelten für **EM24-DIN AV5** — bei anderen Modellvarianten mit dem Datenblatt abgleichen
-- Negative Leistungswerte bedeuten Einspeisung ins Netz
-- Update-Intervall: 10 Sekunden (anpassbar in `modbus_controller`)
+- Register addresses apply to **EM24-DIN AV5** — verify against the datasheet for other model variants
+- Negative power values indicate feed-in to the grid
+- Update interval: 10 seconds (adjustable in `modbus_controller`)
