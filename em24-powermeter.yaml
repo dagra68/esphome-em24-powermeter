@@ -14,12 +14,12 @@ logger:
 # Home Assistant API mit verschlüsselter Verbindung
 api:
   encryption:
-    key: !secret api_encryption_key  # In secrets.yaml auslagern
+    key: !secret api_encryption_key
 
 # OTA-Updates über ESPHome
 ota:
   - platform: esphome
-    password: !secret ota_password   # In secrets.yaml auslagern
+    password: !secret ota_password
 
 wifi:
   ssid: !secret wifi_ssid
@@ -45,6 +45,8 @@ modbus:
 # Carlo Gavazzi EM24 Energiezähler
 # Modbus-Adresse: 0x01 (Werkseinstellung)
 # Update-Intervall: 10 Sekunden
+# Hinweis: Registeradressen gelten für EM24-DIN AV5 3(O)5 X O1 PF A
+# Bei anderen Modellvarianten bitte mit dem Datenblatt abgleichen
 modbus_controller:
   - id: EM24
     address: 0x1
@@ -53,13 +55,369 @@ modbus_controller:
     update_interval: 10s
 
 sensor:
-  # Momentanleistung Heizung
-  # Register 0x28 (DWORD, Big-Endian) — Einheit: 0.1 W → Faktor 0.1 → W
+
+  # ═══════════════════════════════════════════════════════════════
+  # SPANNUNGEN — Phasen gegen Neutralleiter (L-N)
+  # Auflösung: 0.1 V | Typ: S_DWORD_R (32-Bit, signed)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "voltage_l1_n"
+    id: voltage_l1_n
+    address: 0x0000
+    device_class: voltage
+    state_class: measurement
+    icon: mdi:flash
+    unit_of_measurement: "V"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "voltage_l2_n"
+    id: voltage_l2_n
+    address: 0x0002
+    device_class: voltage
+    state_class: measurement
+    icon: mdi:flash
+    unit_of_measurement: "V"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "voltage_l3_n"
+    id: voltage_l3_n
+    address: 0x0004
+    device_class: voltage
+    state_class: measurement
+    icon: mdi:flash
+    unit_of_measurement: "V"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # ═══════════════════════════════════════════════════════════════
+  # SPANNUNGEN — Leiter-Leiter (L-L)
+  # Auflösung: 0.1 V | Typ: S_DWORD_R (32-Bit, signed)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "voltage_l1_l2"
+    id: voltage_l1_l2
+    address: 0x0006
+    device_class: voltage
+    state_class: measurement
+    icon: mdi:flash-triangle
+    unit_of_measurement: "V"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "voltage_l2_l3"
+    id: voltage_l2_l3
+    address: 0x0008
+    device_class: voltage
+    state_class: measurement
+    icon: mdi:flash-triangle
+    unit_of_measurement: "V"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "voltage_l3_l1"
+    id: voltage_l3_l1
+    address: 0x000A
+    device_class: voltage
+    state_class: measurement
+    icon: mdi:flash-triangle
+    unit_of_measurement: "V"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # ═══════════════════════════════════════════════════════════════
+  # STRÖME — Phasenströme
+  # Auflösung: 1 mA → multiply: 0.001 → A | Typ: S_DWORD_R (32-Bit, signed)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "current_l1"
+    id: current_l1
+    address: 0x000C
+    device_class: current
+    state_class: measurement
+    icon: mdi:current-ac
+    unit_of_measurement: "A"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "current_l2"
+    id: current_l2
+    address: 0x000E
+    device_class: current
+    state_class: measurement
+    icon: mdi:current-ac
+    unit_of_measurement: "A"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "current_l3"
+    id: current_l3
+    address: 0x0010
+    device_class: current
+    state_class: measurement
+    icon: mdi:current-ac
+    unit_of_measurement: "A"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  # ═══════════════════════════════════════════════════════════════
+  # WIRKLEISTUNG — pro Phase (Active Power)
+  # Auflösung: 0.1 W | Typ: S_DWORD_R (negativ = Einspeisung)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "power_l1"
+    id: power_l1
+    address: 0x0012
+    device_class: power
+    state_class: measurement
+    icon: mdi:lightning-bolt
+    unit_of_measurement: "W"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "power_l2"
+    id: power_l2
+    address: 0x0014
+    device_class: power
+    state_class: measurement
+    icon: mdi:lightning-bolt
+    unit_of_measurement: "W"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "power_l3"
+    id: power_l3
+    address: 0x0016
+    device_class: power
+    state_class: measurement
+    icon: mdi:lightning-bolt
+    unit_of_measurement: "W"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # ═══════════════════════════════════════════════════════════════
+  # SCHEINLEISTUNG — pro Phase (Apparent Power)
+  # Auflösung: 0.1 VA | Typ: U_DWORD_R (immer positiv)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "apparent_power_l1"
+    id: apparent_power_l1
+    address: 0x0018
+    device_class: apparent_power
+    state_class: measurement
+    icon: mdi:lightning-bolt-outline
+    unit_of_measurement: "VA"
+    register_type: read
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "apparent_power_l2"
+    id: apparent_power_l2
+    address: 0x001A
+    device_class: apparent_power
+    state_class: measurement
+    icon: mdi:lightning-bolt-outline
+    unit_of_measurement: "VA"
+    register_type: read
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "apparent_power_l3"
+    id: apparent_power_l3
+    address: 0x001C
+    device_class: apparent_power
+    state_class: measurement
+    icon: mdi:lightning-bolt-outline
+    unit_of_measurement: "VA"
+    register_type: read
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # ═══════════════════════════════════════════════════════════════
+  # BLINDLEISTUNG — pro Phase (Reactive Power)
+  # Auflösung: 0.1 VAr | Typ: S_DWORD_R (negativ = kapazitiv)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "reactive_power_l1"
+    id: reactive_power_l1
+    address: 0x001E
+    device_class: reactive_power
+    state_class: measurement
+    icon: mdi:sine-wave
+    unit_of_measurement: "VAr"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "reactive_power_l2"
+    id: reactive_power_l2
+    address: 0x0020
+    device_class: reactive_power
+    state_class: measurement
+    icon: mdi:sine-wave
+    unit_of_measurement: "VAr"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "reactive_power_l3"
+    id: reactive_power_l3
+    address: 0x0022
+    device_class: reactive_power
+    state_class: measurement
+    icon: mdi:sine-wave
+    unit_of_measurement: "VAr"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # ═══════════════════════════════════════════════════════════════
+  # LEISTUNGSFAKTOR — pro Phase (Power Factor)
+  # Auflösung: 0.001 | Typ: S_WORD (16-Bit, signed)
+  # Wertebereich: -1.000 bis +1.000 (negativ = Einspeisung/kapazitiv)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "power_factor_l1"
+    id: power_factor_l1
+    address: 0x0024
+    device_class: power_factor
+    state_class: measurement
+    icon: mdi:angle-acute
+    unit_of_measurement: ""
+    register_type: read
+    value_type: S_WORD
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "power_factor_l2"
+    id: power_factor_l2
+    address: 0x0025
+    device_class: power_factor
+    state_class: measurement
+    icon: mdi:angle-acute
+    unit_of_measurement: ""
+    register_type: read
+    value_type: S_WORD
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "power_factor_l3"
+    id: power_factor_l3
+    address: 0x0026
+    device_class: power_factor
+    state_class: measurement
+    icon: mdi:angle-acute
+    unit_of_measurement: ""
+    register_type: read
+    value_type: S_WORD
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  # ═══════════════════════════════════════════════════════════════
+  # GESAMT-WIRKLEISTUNG (Total Active Power)
+  # Auflösung: 0.1 W | Typ: U_DWORD_R
+  # ═══════════════════════════════════════════════════════════════
+
+  # Bestehender Sensor — beibehaltener Name für HA-Kompatibilität
   - platform: modbus_controller
     modbus_controller_id: EM24
     name: "power_heating"
     id: power_heating
-    address: 0x28
+    address: 0x0028
     device_class: power
     state_class: measurement
     icon: mdi:heat-pump
@@ -70,13 +428,114 @@ sensor:
     filters:
       - multiply: 0.1
 
-  # Gesamtenergie Heizung (Zählerstand)
-  # Register 0x3E (DWORD, Big-Endian) — Einheit: 0.1 kWh → Faktor 0.1 → kWh
+  # ═══════════════════════════════════════════════════════════════
+  # GESAMT-SCHEINLEISTUNG (Total Apparent Power)
+  # Auflösung: 0.1 VA | Typ: U_DWORD_R
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "apparent_power_total"
+    id: apparent_power_total
+    address: 0x002A
+    device_class: apparent_power
+    state_class: measurement
+    icon: mdi:lightning-bolt-outline
+    unit_of_measurement: "VA"
+    register_type: read
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # ═══════════════════════════════════════════════════════════════
+  # GESAMT-BLINDLEISTUNG (Total Reactive Power)
+  # Auflösung: 0.1 VAr | Typ: S_DWORD_R (negativ = kapazitiv)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "reactive_power_total"
+    id: reactive_power_total
+    address: 0x002C
+    device_class: reactive_power
+    state_class: measurement
+    icon: mdi:sine-wave
+    unit_of_measurement: "VAr"
+    register_type: read
+    value_type: S_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # ═══════════════════════════════════════════════════════════════
+  # GESAMT-LEISTUNGSFAKTOR (Total Power Factor)
+  # Auflösung: 0.001 | Typ: S_WORD (16-Bit, signed)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "power_factor_total"
+    id: power_factor_total
+    address: 0x002E
+    device_class: power_factor
+    state_class: measurement
+    icon: mdi:angle-acute
+    unit_of_measurement: ""
+    register_type: read
+    value_type: S_WORD
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  # ═══════════════════════════════════════════════════════════════
+  # NETZFREQUENZ (Frequency)
+  # Auflösung: 0.1 Hz | Typ: S_WORD (16-Bit, signed)
+  # ═══════════════════════════════════════════════════════════════
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "frequency_internal"
+    id: frequency_internal
+    address: 0x0037
+    device_class: frequency
+    state_class: measurement
+    icon: mdi:sine-wave
+    unit_of_measurement: "Hz"
+    register_type: read
+    value_type: S_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # ═══════════════════════════════════════════════════════════════
+  # ENERGIE — Wirkenergie Import/Export (Active Energy)
+  # Auflösung: 0.1 kWh | Typ: U_DWORD_R (32-Bit, unsigned)
+  # ═══════════════════════════════════════════════════════════════
+
+  # Wirkenergie Import (Bezug aus dem Netz)
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "energy_import"
+    id: energy_import
+    address: 0x003C
+    device_class: energy
+    state_class: total_increasing
+    icon: mdi:transmission-tower-import
+    unit_of_measurement: "kWh"
+    register_type: read
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  # Bestehender Sensor — beibehaltener Name für HA-Kompatibilität
+  # Wirkenergie Export (Einspeisung ins Netz) oder Teilzähler je nach Modell
   - platform: modbus_controller
     modbus_controller_id: EM24
     name: "energy_heating"
     id: energy_heating
-    address: 0x3E
+    address: 0x003E
     device_class: energy
     state_class: total_increasing
     icon: mdi:transmission-tower-export
@@ -87,19 +546,69 @@ sensor:
     filters:
       - multiply: 0.1
 
-  # Netzfrequenz
-  # Register 0x37 (WORD, signed) — Einheit: 0.1 Hz → Faktor 0.1 → Hz
+  # ═══════════════════════════════════════════════════════════════
+  # ENERGIE — Blindenergie (Reactive Energy)
+  # Auflösung: 0.1 kVArh | Typ: U_DWORD_R (32-Bit, unsigned)
+  # Q1 = induktiv/import | Q2 = kapazitiv/import
+  # Q3 = induktiv/export | Q4 = kapazitiv/export
+  # ═══════════════════════════════════════════════════════════════
+
   - platform: modbus_controller
     modbus_controller_id: EM24
-    name: "frequency_internal"
-    id: frequency_internal
-    address: 0x37
-    device_class: frequency    # KORRIGIERT: war fälschlicherweise "power"
-    state_class: measurement
-    icon: mdi:sine-wave        # KORRIGIERT: passendes Icon für Frequenz
-    unit_of_measurement: "Hz"
+    name: "reactive_energy_q1"
+    id: reactive_energy_q1
+    address: 0x0040
+    device_class: energy
+    state_class: total_increasing
+    icon: mdi:chart-bell-curve
+    unit_of_measurement: "kVArh"
     register_type: read
-    value_type: S_WORD
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "reactive_energy_q2"
+    id: reactive_energy_q2
+    address: 0x0042
+    device_class: energy
+    state_class: total_increasing
+    icon: mdi:chart-bell-curve
+    unit_of_measurement: "kVArh"
+    register_type: read
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "reactive_energy_q3"
+    id: reactive_energy_q3
+    address: 0x0044
+    device_class: energy
+    state_class: total_increasing
+    icon: mdi:chart-bell-curve
+    unit_of_measurement: "kVArh"
+    register_type: read
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: EM24
+    name: "reactive_energy_q4"
+    id: reactive_energy_q4
+    address: 0x0046
+    device_class: energy
+    state_class: total_increasing
+    icon: mdi:chart-bell-curve
+    unit_of_measurement: "kVArh"
+    register_type: read
+    value_type: U_DWORD_R
     accuracy_decimals: 1
     filters:
       - multiply: 0.1
