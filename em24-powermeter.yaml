@@ -412,11 +412,10 @@ sensor:
   # Auflösung: 0.1 W | Typ: U_DWORD_R
   # ═══════════════════════════════════════════════════════════════
 
-  # Bestehender Sensor — beibehaltener Name für HA-Kompatibilität
   - platform: modbus_controller
     modbus_controller_id: EM24
-    name: "power_heating"
-    id: power_heating
+    name: "power_total"
+    id: power_total
     address: 0x0028
     device_class: power
     state_class: measurement
@@ -495,8 +494,8 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: EM24
-    name: "frequency_internal"
-    id: frequency_internal
+    name: "frequency"
+    id: frequency
     address: 0x0037
     device_class: frequency
     state_class: measurement
@@ -529,12 +528,11 @@ sensor:
     filters:
       - multiply: 0.1
 
-  # Bestehender Sensor — beibehaltener Name für HA-Kompatibilität
   # Wirkenergie Export (Einspeisung ins Netz) oder Teilzähler je nach Modell
   - platform: modbus_controller
     modbus_controller_id: EM24
-    name: "energy_heating"
-    id: energy_heating
+    name: "energy_export"
+    id: energy_export
     address: 0x003E
     device_class: energy
     state_class: total_increasing
