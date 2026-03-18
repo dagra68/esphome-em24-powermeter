@@ -35,6 +35,45 @@ Reads all available measurements and exposes them to Home Assistant.
 
 ## Measurements
 
+**32 sensors total** — all exposed as Home Assistant entities via native API.
+
+| Sensor | Unit | Description |
+|--------|------|-------------|
+| `voltage_l1_n` | V | Phase L1 to neutral |
+| `voltage_l2_n` | V | Phase L2 to neutral |
+| `voltage_l3_n` | V | Phase L3 to neutral |
+| `voltage_l1_l2` | V | Line voltage L1–L2 |
+| `voltage_l2_l3` | V | Line voltage L2–L3 |
+| `voltage_l3_l1` | V | Line voltage L3–L1 |
+| `current_l1` | A | Phase L1 current |
+| `current_l2` | A | Phase L2 current |
+| `current_l3` | A | Phase L3 current |
+| `power_l1` | W | Active power L1 |
+| `power_l2` | W | Active power L2 |
+| `power_l3` | W | Active power L3 |
+| `power_total` | W | Total active power |
+| `apparent_power_l1` | VA | Apparent power L1 |
+| `apparent_power_l2` | VA | Apparent power L2 |
+| `apparent_power_l3` | VA | Apparent power L3 |
+| `apparent_power_total` | VA | Total apparent power |
+| `reactive_power_l1` | VAr | Reactive power L1 |
+| `reactive_power_l2` | VAr | Reactive power L2 |
+| `reactive_power_l3` | VAr | Reactive power L3 |
+| `reactive_power_total` | VAr | Total reactive power |
+| `power_factor_l1` | — | Power factor L1 |
+| `power_factor_l2` | — | Power factor L2 |
+| `power_factor_l3` | — | Power factor L3 |
+| `power_factor_total` | — | Total power factor |
+| `frequency` | Hz | Grid frequency |
+| `energy_import` | kWh | Active energy import (grid consumption) |
+| `energy_export` | kWh | Active energy export (grid feed-in) |
+| `reactive_energy_q1` | kVArh | Reactive energy Q1 (inductive import) |
+| `reactive_energy_q2` | kVArh | Reactive energy Q2 (capacitive import) |
+| `reactive_energy_q3` | kVArh | Reactive energy Q3 (inductive export) |
+| `reactive_energy_q4` | kVArh | Reactive energy Q4 (capacitive export) |
+
+---
+
 ### Voltages
 | Sensor | Unit | Register |
 |--------|------|----------|
